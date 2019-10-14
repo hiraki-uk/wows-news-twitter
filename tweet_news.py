@@ -112,8 +112,8 @@ class Tweet_news:
 			self.logger.critical('No title or description found.')
 			return
 
-		url_length = len(url)
-		total_length = len(url) + len(status)
+		url_length = 12
+		total_length = len(status) + url_length
 		# if over 140 limit shorten status
 		if 135 < total_length:
 			self.logger.debug('Status length is over limit.')
