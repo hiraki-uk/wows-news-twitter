@@ -1,6 +1,7 @@
 import asyncio
 
 import twitter
+from twitter.twitter_utils import calc_expected_status_length as calc_status_length
 
 from database import Database
 from logger import Logger
@@ -111,16 +112,21 @@ class Tweet_news:
 		elif not status:
 			self.logger.critical('No title or description found.')
 			return
+		
+		temp_status = f'{status}...\n{url}'
+		# if over 280 limit shorten status
+		while calc_status_length(temp_status) < 270:
+			status = status[:-1]
 
-		url_length = 23
-		total_length = len(status) + url_length
-		# if over 140 limit shorten status
-		if 135 < total_length:
-			self.logger.debug('Status length is over limit.')
-			exceed_length = 140 - total_length
-			status = status[:exceed_length] + '...\n'
+		# if 270 < calc_status_length(temp_status):
+		# 	self.logger.debug('Status length is over limit.')
+		# 	exceed_length = 270 - calc_status_length(temp_status)
+		# 	# remove exceed_length from status
+		# 	status = f'{status[:exceed_length]}...\n{url}'
 
-		status += url
+		# in case status length goes crazy
+		assert calc_status_length(status) <= 280
+		
 		self.logger.debug(f'tweeting {status}')
 		self.api.PostUpdate(status)
 		self.logger.debug('tweeted.')
