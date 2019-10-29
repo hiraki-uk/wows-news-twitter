@@ -9,7 +9,9 @@ from logger import Logger
 
 class Tweet_news:
 	def __init__(self, key, secret_key, token, token_secret, db_path, logger=None):
-		self.latest_id = 0
+		# self.latest_id = 0
+		self.latest_id = 1
+
 		self.database = Database(db_path)
 		self.api = twitter.Api(
 			consumer_key = key,
@@ -113,10 +115,18 @@ class Tweet_news:
 			self.logger.critical('No title or description found.')
 			return
 		
-		temp_status = f'{status}...\n{url}'
+		temp_status = f'{status}\n{url}'
 		# if over 280 limit shorten status
-		while calc_status_length(temp_status) < 270:
-			status = status[:-1]
+		if not calc_status_length(temp_status) < 270:
+			# using while as removing exceed_length not always work 
+			# due to 2 length letters and 1 length letters
+			while 270 < calc_status_length(temp_status):
+				self.logger.debug(f'length is {calc_status_length(temp_status)}')
+				exceed_length = (270 - calc_status_length(temp_status)) // 2
+				status = status[:exceed_length]
+
+				temp_status = f'{status}...\n{url}'
+		final_status = temp_status
 
 		# if 270 < calc_status_length(temp_status):
 		# 	self.logger.debug('Status length is over limit.')
@@ -125,8 +135,9 @@ class Tweet_news:
 		# 	status = f'{status[:exceed_length]}...\n{url}'
 
 		# in case status length goes crazy
-		assert calc_status_length(status) <= 280
+		final_status = temp_status
+		assert calc_status_length(final_status) <= 280
 		
 		self.logger.debug(f'tweeting {status}')
-		self.api.PostUpdate(status)
+		self.api.PostUpdate(final_status)
 		self.logger.debug('tweeted.')
