@@ -1,7 +1,8 @@
-from logger import Logger
 import sqlite3
-from sqlite3 import Connection
 import traceback
+from sqlite3 import Connection
+
+from logger import Logger
 
 
 class Database:
